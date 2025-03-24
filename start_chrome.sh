@@ -63,10 +63,9 @@ check_drivers
 
 # 启动Chromium
 echo -e "${YELLOW}正在启动Chromium...${NC}"
-chromium-browser \
+chromium \
     --remote-debugging-port=9222 \
     --user-data-dir="$HOME/.config/chromium-debug" \
-    --no-sandbox \
     --disable-gpu \
     https://polymarket.com/markets/crypto
 

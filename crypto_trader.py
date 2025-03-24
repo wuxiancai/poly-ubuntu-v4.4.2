@@ -81,9 +81,8 @@ class CryptoTrader:
         super().__init__()
         self.logger = Logger('poly')
         # 添加Linux专用配置
-        self.chrome_binary_path = '/usr/bin/google-chrome' if SYSTEM_OS == 'Linux' else None
-        self.chromedriver_path = '/usr/bin/chromedriver' if SYSTEM_OS == 'Linux' else None
-
+        self.chrome_binary_path = '/snap/bin/chromium'  # Ubuntu 24 LTS的正确路径
+        self.chromedriver_path = '/snap/bin/chromium.chromedriver'
         self.driver = None
         self.running = False
         self.trading = False
@@ -838,21 +837,9 @@ class CryptoTrader:
                     chrome_options.add_argument('--no-sandbox')
                     chrome_options.add_argument('--disable-dev-shm-usage')
                     chrome_options.add_argument('--remote-debugging-port=9222')
-                
-                try:
-                    # 修改Driver初始化方式
-                    if self.chromedriver_path:
-                        from selenium.webdriver.chrome.service import Service
-                        self.driver = webdriver.Chrome(
-                            service=Service(self.chromedriver_path),
-                            options=chrome_options
-                        )
-                    else:
-                        self.driver = webdriver.Chrome(options=chrome_options)
-                except Exception as e:
-                    self.logger.error(f"连接浏览器失败: {str(e)}")
-                    self._show_error_and_reset("无法连接Chrome浏览器,请确保已运行start_chrome.sh")
-                    return
+                    from selenium.webdriver.chrome.service import Service
+                    service = Service(executable_path=self.chromedriver_path)
+                    self.driver = webdriver.Chrome(service=service, options=chrome_options)
             try:
                 # 在当前标签页打开URL
                 self.driver.get(new_url)

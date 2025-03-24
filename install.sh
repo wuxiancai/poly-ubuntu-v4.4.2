@@ -19,8 +19,15 @@ REQUIREMENTS="requirements.txt"
 
 # 安装系统依赖
 echo -e "${GREEN}安装系统依赖...${NC}"
-# 在系统依赖安装部分添加 python3-tk
+# 在系统依赖列表中添加
 sudo apt-get install -y \
+    libnss3 \
+    libxss1 \
+    libgbm1 \
+    libasound2 \
+    fonts-liberation \
+    x11-xserver-utils \
+    dbus-x11  # X11相关依赖
     gcc \
     python3-dev \
     python3-venv \
