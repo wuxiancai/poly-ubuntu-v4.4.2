@@ -16,10 +16,36 @@ fi
 # 创建虚拟环境目录
 VENV_DIR=".venv"
 REQUIREMENTS="requirements.txt"
+# 创建本地浏览器目录
+mkdir -p chrome driver
 
-# 安装系统依赖
+# 下载并解压Chromium
+echo -e "${GREEN}下载最新版Chromium...${NC}"
+wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+dpkg -x google-chrome-stable_current_amd64.deb chrome
+rm google-chrome-stable_current_amd64.deb
+
+# 获取本地Chromium版本
+CHROME_PATH="./chrome/opt/google/chrome/chrome"
+CHROME_VERSION=$($CHROME_PATH --version | grep -oP 'Google Chrome \K\d+\.\d+\.\d+\.\d+')
+
+# 下载匹配的驱动
+echo -e "${GREEN}下载匹配的Chromedriver (v${CHROME_VERSION})...${NC}"
+DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+unzip -q chromedriver_linux64.zip -d driver
+rm chromedriver_linux64.zip
+chmod +x driver/chromedriver
+
+# 生成配置文件
+echo -e "${GREEN}生成路径配置...${NC}"
+cat > config.py <<EOL
+CHROME_BINARY = "./chrome/opt/google/chrome/chrome"
+CHROME_DRIVER = "./driver/chromedriver"
+EOL
+
+# 安装系统依赖（修正依赖列表格式）
 echo -e "${GREEN}安装系统依赖...${NC}"
-# 在系统依赖列表中添加
 sudo apt-get install -y \
     libnss3 \
     libxss1 \
@@ -27,43 +53,46 @@ sudo apt-get install -y \
     libasound2 \
     fonts-liberation \
     x11-xserver-utils \
-    dbus-x11  # X11相关依赖
+    dbus-x11 \
     gcc \
-    python3-dev \
-    python3-venv \
-    python3-tk \  # 新增的tkinter依赖
+    python3-tk \
     libx11-dev \
     libxtst-dev \
     libxt-dev \
     libxinerama-dev \
     libxcursor-dev \
-    chromium-browser \  # 修改为Ubuntu 24 LTS的Chromium包名
     xvfb \
     unzip \
     wget \
     python3-pip \
-    chromium-chromedriver  # 添加chromium专用驱动
+    libappindicator3-1  # 新增必要依赖
 
-# 获取已安装Chromium版本
-CHROMIUM_VERSION=$(chromium-browser --version | grep -oP 'Chromium \K\d+\.\d+\.\d+\.\d+')
-if [ -z "$CHROMIUM_VERSION" ]; then
-    echo -e "${RED}错误: 无法获取Chromium版本${NC}"
+# 移除以下冲突项：
+#    chromium \        # 不再需要系统版Chromium
+#    chromium-chromedriver  # 使用本地驱动
+
+# 修正版本获取逻辑（约28行）
+# 在生成config.py前添加验证
+if [ ! -f "$CHROME_PATH" ]; then
+    echo -e "${RED}错误: Chrome 可执行文件未找到${NC}"
     exit 1
 fi
-
-# 安装匹配的Chromedriver
-echo -e "${GREEN}配置 Chromium Driver (v$CHROMIUM_VERSION)...${NC}"
-CHROME_DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROMIUM_VERSION")
-if [ -z "$CHROME_DRIVER_VERSION" ]; then
-    echo -e "${YELLOW}警告: 无法获取匹配驱动版本，使用最新版${NC}"
-    CHROME_DRIVER_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
+if [ ! -f "./driver/chromedriver" ]; then
+    echo -e "${RED}错误: 驱动文件未找到${NC}"
+    exit 1
 fi
+# 获取本地Chrome版本
+CHROME_PATH="./chrome/opt/google/chrome/chrome"
+CHROME_VERSION=$($CHROME_PATH --version | grep -oP 'Google Chrome \K\d+')
+# 只取主版本号（如124），避免匹配子版本导致驱动下载失败
 
-wget -q "https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip"
-unzip -q chromedriver_linux64.zip
-sudo mv chromedriver /usr/bin/
-sudo chmod +x /usr/bin/chromedriver
+# 下载匹配的驱动
+echo -e "${GREEN}下载匹配的Chromedriver (v${CHROME_VERSION})...${NC}"
+DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+unzip -q chromedriver_linux64.zip -d driver
 rm chromedriver_linux64.zip
+chmod +x driver/chromedriver
 
 # 创建虚拟环境
 echo -e "${GREEN}创建Python虚拟环境...${NC}"
