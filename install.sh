@@ -26,23 +26,16 @@ dpkg -x google-chrome-stable_current_amd64.deb chrome
 rm google-chrome-stable_current_amd64.deb
 
 # 获取本地Chromium版本
-CHROME_PATH="./chrome/opt/google/chrome/chrome"
+CHROME_PATH="./chrome/opt/google/chrome
 CHROME_VERSION=$($CHROME_PATH --version | grep -oP 'Google Chrome \K\d+\.\d+\.\d+\.\d+')
 
 # 下载匹配的驱动
 echo -e "${GREEN}下载匹配的Chromedriver (v${CHROME_VERSION})...${NC}"
 DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+wget -q "https://storage.googleapis.com/chrome-for-testing-public/${DRIVER_VERSION}/linux64/chromedriver-linux64.zip"
 unzip -q chromedriver_linux64.zip -d driver
 rm chromedriver_linux64.zip
 chmod +x driver/chromedriver
-
-# 生成配置文件
-echo -e "${GREEN}生成路径配置...${NC}"
-cat > config.py <<EOL
-CHROME_BINARY = "./chrome/opt/google/chrome/chrome"
-CHROME_DRIVER = "./driver/chromedriver"
-EOL
 
 # 安装系统依赖（修正依赖列表格式）
 echo -e "${GREEN}安装系统依赖...${NC}"
@@ -66,33 +59,6 @@ sudo apt-get install -y \
     wget \
     python3-pip \
     libappindicator3-1  # 新增必要依赖
-
-# 移除以下冲突项：
-#    chromium \        # 不再需要系统版Chromium
-#    chromium-chromedriver  # 使用本地驱动
-
-# 修正版本获取逻辑（约28行）
-# 在生成config.py前添加验证
-if [ ! -f "$CHROME_PATH" ]; then
-    echo -e "${RED}错误: Chrome 可执行文件未找到${NC}"
-    exit 1
-fi
-if [ ! -f "./driver/chromedriver" ]; then
-    echo -e "${RED}错误: 驱动文件未找到${NC}"
-    exit 1
-fi
-# 获取本地Chrome版本
-CHROME_PATH="./chrome/opt/google/chrome/chrome"
-CHROME_VERSION=$($CHROME_PATH --version | grep -oP 'Google Chrome \K\d+')
-# 只取主版本号（如124），避免匹配子版本导致驱动下载失败
-
-# 下载匹配的驱动
-echo -e "${GREEN}下载匹配的Chromedriver (v${CHROME_VERSION})...${NC}"
-DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
-unzip -q chromedriver_linux64.zip -d driver
-rm chromedriver_linux64.zip
-chmod +x driver/chromedriver
 
 # 创建虚拟环境
 echo -e "${GREEN}创建Python虚拟环境...${NC}"
