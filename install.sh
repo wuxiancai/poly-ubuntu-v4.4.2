@@ -19,10 +19,12 @@ REQUIREMENTS="requirements.txt"
 
 # 安装系统依赖
 echo -e "${GREEN}安装系统依赖...${NC}"
-sudo apt-get update && sudo apt-get install -y \
+# 在系统依赖安装部分添加 python3-tk
+sudo apt-get install -y \
     gcc \
     python3-dev \
     python3-venv \
+    python3-tk \  # 新增的tkinter依赖
     libx11-dev \
     libxtst-dev \
     libxt-dev \
