@@ -63,40 +63,34 @@ elif [[ "$ARCH" == "amd64" ]]; then
     echo "检测到Chrome主版本号: $CHROME_VERSION"
     
     CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json" | jq -r '.versions[] | select(.version | startswith("'$CHROME_VERSION'")) | .version' | head -n 1)
-    echo "Chrome 主版本号: $CHROME_VERSION"
-    echo "匹配的 ChromeDriver 版本: $CHROMEDRIVER_VERSION"
+    if [[ -z "$CHROMEDRIVER_VERSION" ]]; then
+        echo "❌ 未找到匹配的 ChromeDriver 版本！"
+        exit 1
+    fi
 
-    ARCH=$(dpkg --print-architecture)
+    echo "找到 ChromeDriver 版本: $CHROMEDRIVER_VERSION"
 
+    # 适配不同架构
     if [[ "$ARCH" == "amd64" ]]; then
-        PLATFORM="linux64"
-    elif [[ "$ARCH" == "arm64" ]]; then
-        PLATFORM="linux-arm64"
+        DRIVER_FILE="chromedriver-linux64.zip"
     else
         echo "❌ 不支持的架构: $ARCH"
         exit 1
     fi
 
-    # 获取 ChromeDriver 下载 URL
-    CHROMEDRIVER_URL=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json" | jq -r --arg ver "$CHROMEDRIVER_VERSION" --arg plat "$PLATFORM" '.versions[] | select(.version == $ver) | .downloads.chromedriver[] | select(.platform == $plat) | .url')
-
-    if [[ -z "$CHROMEDRIVER_URL" ]]; then
-        echo "❌ 未找到匹配的 ChromeDriver 下载链接！"
-        exit 1
-    fi
-
-    echo "🔗 下载链接: $CHROMEDRIVER_URL"
-
     # 下载 ChromeDriver
-    wget "$CHROMEDRIVER_URL" -O chromedriver.zip
-    unzip chromedriver.zip
+    echo "下载 ChromeDriver: $DRIVER_FILE"
+    wget "https://storage.googleapis.com/chrome-for-testing-public/${CHROMEDRIVER_VERSION}/${DRIVER_FILE}"
+
+    # 解压并安装
+    unzip ${DRIVER_FILE}
     sudo mv chromedriver-linux*/chromedriver /usr/local/bin/
     sudo chmod +x /usr/local/bin/chromedriver
-    rm -rf chromedriver-linux* chromedriver.zip
+    rm -rf chromedriver-linux* ${DRIVER_FILE}
 
     # 验证安装
+    echo "✅ 安装完成！"
     chromedriver --version
-    echo "✅ ChromeDriver 安装完成！"
 else
     echo "❌ 不支持的架构: $ARCH"
     exit 1
