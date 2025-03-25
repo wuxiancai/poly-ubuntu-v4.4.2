@@ -63,10 +63,19 @@ check_drivers
 
 # 启动Chromium
 echo -e "${YELLOW}正在启动Chromium...${NC}"
+# 确保目录存在并设置正确权限
+CHROME_DEBUG_DIR="$HOME/chromium-debug"
+mkdir -p "$CHROME_DEBUG_DIR"
+chmod 755 "$CHROME_DEBUG_DIR"
+
+# 确保没有其他Chromium实例在运行
+pkill -f chromium || true
+sleep 2
 chromium \
     --remote-debugging-port=9222 \
-    --user-data-dir="$HOME/.config/chromium-debug" \
+    --user-data-dir="CHROME_DEBUG_DIR" \
     --disable-gpu \
-    https://polymarket.com/markets/crypto
+    --disable-dev-shm-usage \
+    https://polymarket.com/markets/crypto &
 
 echo -e "${GREEN}Chromium已成功启动！${NC}"

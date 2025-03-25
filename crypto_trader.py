@@ -1365,14 +1365,14 @@ class CryptoTrader:
 
             # 计算 MetaMask 弹窗的 "连接" 按钮位置
             connect_button_x = screen_width - 95  # 按钮位于屏幕右侧，稍微向左偏移范围 92-120
-            connect_button_y = 600  # 观察图片后估算按钮的Y坐标,范围 590-620
+            connect_button_y = 640 # 观察图片后估算按钮的Y坐标,范围 590-620
             time.sleep(2)
             # 点击 "连接" 按钮
             pyautogui.click(connect_button_x, connect_button_y) 
             
             # 计算 "确认" 按钮位置
             confirm_button_x = screen_width - 95  # 同样靠右对齐
-            confirm_button_y = 600  # "确认" 按钮通常在下方
+            confirm_button_y = 640  # "确认" 按钮通常在下方
 
             time.sleep(2)
             pyautogui.click(confirm_button_x, confirm_button_y)  # 点击 "确认" 按钮
@@ -2749,7 +2749,7 @@ class CryptoTrader:
 
             # 计算 "确认" 按钮位置
             confirm_button_x = screen_width - 95  # 同样靠右对齐
-            confirm_button_y = 600  # "确认" 按钮通常在下方
+            confirm_button_y = 640  # "确认" 按钮通常在下方
             # 点击 "确认" 按钮
             time.sleep(1)
             pyautogui.click(confirm_button_x, confirm_button_y)  

@@ -39,7 +39,9 @@ sudo apt-get install -y --fix-missing \
     wget \
     xauth \
     x11-apps \
-    xdpyinfo
+    xdpyinfo \
+    python3-xlib \
+    scrot
 
 set -e  # 发生错误时退出
 ARCH=$(dpkg --print-architecture)
@@ -69,6 +71,7 @@ chromedriver --version
 
 # 创建虚拟环境并安装依赖
 echo -e "${GREEN}创建Python虚拟环境...${NC}"
+sudo apt install python3.10-venv -y
 sudo rm -rf .venv
 python3 -m venv .venv
 
@@ -77,18 +80,16 @@ source .venv/bin/activate
 
 # 使用pip安装依赖
 echo -e "${GREEN}安装Python依赖...${NC}"
-apt update && sudo apt upgrade -y
-apt install -y python3 python3-pip python3-venv
-pip install selenium screeninfo
-apt install -y python3-tk python3-dev scrot
-apt install -y python3-xlib
-pip install pyautogui
+sudo apt update && sudo apt upgrade -y
+sudo apt-get install python3-tk python3-dev -y
+pip3 install selenium screeninfo
+pip3 install pyautogui
 
 # 验证安装
 echo -e "${GREEN}验证Python依赖安装...${NC}"
 python3 -c "import selenium; print('Selenium版本:', selenium.__version__)"
 python3 -c "import pyautogui; print('PyAutoGUI版本:', pyautogui.__version__)"
-python3 -c "import screeninfo; print('ScreenInfo版本:', screeninfo.__version__)"
+
 
 # 创建运行脚本
 echo -e "${GREEN}创建运行脚本...${NC}"
