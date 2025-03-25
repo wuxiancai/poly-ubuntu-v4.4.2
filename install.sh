@@ -46,31 +46,41 @@ sudo apt-get install -y --fix-missing \
 set -e  # 发生错误时退出
 ARCH=$(dpkg --print-architecture)
 
-# 检查是否为 ARM64 架构
-if [[ "$ARCH" != "arm64" ]]; then
-    echo "错误: 该脚本仅支持 ARM64 架构 (你的架构: $ARCH)"
+# 适配 ARM64 和 AMD64
+if [[ "$ARCH" == "arm64" ]]; then
+    echo "✅ 检测到 ARM64 架构，开始安装 Chromium 和 ChromeDriver..."
+    sudo apt install -y chromium-browser chromium-chromedriver
+elif [[ "$ARCH" == "amd64" ]]; then
+    echo "✅ 检测到 AMD64 架构，开始安装 Google Chrome 和 ChromeDriver..."
+    
+    # 下载 Google Chrome
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
+
+    # 安装 ChromeDriver
+    CHROME_VERSION=$(google-chrome --version | grep -oP '[0-9]+(\.[0-9]+)*')
+    CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+    wget "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+    unzip chromedriver_linux64.zip
+    sudo mv chromedriver /usr/local/bin/
+    sudo chmod +x /usr/local/bin/chromedriver
+else
+    echo "❌ 不支持的架构: $ARCH"
     exit 1
 fi
 
-echo "✅ 检测到 ARM64 架构，开始安装 Chromium 和 ChromeDriver..."
-
-# 2️⃣ 安装 ARM64 版 Chromium
-echo "🚀 安装 Chromium..."
-sudo apt update
-sudo apt install -y chromium-browser
-
-# 5️⃣ 下载 ARM64 兼容的 ChromeDriver
-echo "🌍 获取 ChromeDriver 兼容版本..."
-sudo apt install -y chromium-chromedriver
-echo "✅ ChromeDriver 安装完成"
-
-# 7️⃣ 验证安装
+# 验证安装
 echo "🎯 验证安装..."
-chromium --version
-chromedriver --version
+if [[ "$ARCH" == "arm64" ]]; then
+    chromium --version
+    chromedriver --version
+else
+    google-chrome --version
+    chromedriver --version
+fi
 
-# 创建虚拟环境并安装依赖
-echo -e "${GREEN}创建Python虚拟环境...${NC}"
+# 创建 Python 虚拟环境
+echo -e "${GREEN}创建 Python 虚拟环境...${NC}"
 sudo apt install python3.10-venv -y
 sudo rm -rf .venv
 python3 -m venv .venv
@@ -78,18 +88,15 @@ python3 -m venv .venv
 # 激活虚拟环境并安装依赖
 source .venv/bin/activate
 
-# 使用pip安装依赖
-echo -e "${GREEN}安装Python依赖...${NC}"
+echo -e "${GREEN}安装 Python 依赖...${NC}"
 sudo apt update && sudo apt upgrade -y
 sudo apt-get install python3-tk python3-dev -y
-pip3 install selenium screeninfo
-pip3 install pyautogui
+pip3 install selenium screeninfo pyautogui
 
 # 验证安装
-echo -e "${GREEN}验证Python依赖安装...${NC}"
-python3 -c "import selenium; print('Selenium版本:', selenium.__version__)"
-python3 -c "import pyautogui; print('PyAutoGUI版本:', pyautogui.__version__)"
-
+echo -e "${GREEN}验证 Python 依赖安装...${NC}"
+python3 -c "import selenium; print('Selenium 版本:', selenium.__version__)"
+python3 -c "import pyautogui; print('PyAutoGUI 版本:', pyautogui.__version__)"
 
 # 创建运行脚本
 echo -e "${GREEN}创建运行脚本...${NC}"
@@ -101,20 +108,14 @@ source .venv/bin/activate
 # 检查是否有实际显示器
 if xdpyinfo >/dev/null 2>&1; then
   echo "检测到实际显示器，使用实际显示"
-  # 使用实际显示器
   python3 crypto_trader.py
 else
   echo "未检测到实际显示器，使用虚拟显示"
-  # 设置虚拟显示
   export DISPLAY=:99
   Xvfb :99 -screen 0 1280x1024x24 &
   XVFB_PID=$!
-  sleep 2  # 等待Xvfb启动
-  
-  # 运行交易程序
+  sleep 2
   python3 crypto_trader.py
-  
-  # 清理
   kill $XVFB_PID
 fi
 EOL
