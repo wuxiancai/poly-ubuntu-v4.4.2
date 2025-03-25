@@ -109,31 +109,14 @@ sudo apt update && sudo apt upgrade -y
 sudo apt-get install python3-tk python3-dev -y
 pip3 install selenium screeninfo pyautogui
 
-# 验证安装
-echo -e "${GREEN}验证 Python 依赖安装...${NC}"
-python3 -c "import selenium; print('Selenium 版本:', selenium.__version__)"
-python3 -c "import pyautogui; print('PyAutoGUI 版本:', pyautogui.__version__)"
-
 # 创建运行脚本
 echo -e "${GREEN}创建运行脚本...${NC}"
 cat > run_trade.sh << 'EOL'
 #!/bin/bash
 # 激活虚拟环境
 source .venv/bin/activate
+python3 crypto_trader.py
 
-# 检查是否有实际显示器
-if xdpyinfo >/dev/null 2>&1; then
-  echo "检测到实际显示器，使用实际显示"
-  python3 crypto_trader.py
-else
-  echo "未检测到实际显示器，使用虚拟显示"
-  export DISPLAY=:99
-  Xvfb :99 -screen 0 1280x1024x24 &
-  XVFB_PID=$!
-  sleep 2
-  python3 crypto_trader.py
-  kill $XVFB_PID
-fi
 EOL
 
 # 创建日志目录
