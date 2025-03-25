@@ -62,10 +62,6 @@ elif [[ "$ARCH" == "amd64" ]]; then
     echo "检测到Chrome主版本号: $CHROME_VERSION"
     
     CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json" | jq -r '.versions[] | select(.version == "134.0.6944.0") | .downloads.chromedriver[] | select(.platform == "linux64") | .url')
-    if [[ -z "$CHROMEDRIVER_VERSION" ]]; then
-        echo "❌ 未找到匹配的 ChromeDriver 版本！"
-        exit 1
-    fi
     echo "找到 ChromeDriver 版本: $CHROMEDRIVER_VERSION"
     # 下载 ChromeDriver
     wget "$CHROMEDRIVER_VERSION"
@@ -96,6 +92,7 @@ fi
 
 # 创建 Python 虚拟环境
 echo -e "${GREEN}创建 Python 虚拟环境...${NC}"
+python_version = python3 --version
 sudo apt install python3.10-venv -y
 sudo rm -rf .venv
 python3 -m venv .venv
@@ -107,6 +104,10 @@ echo -e "${GREEN}安装 Python 依赖...${NC}"
 sudo apt update && sudo apt upgrade -y
 sudo apt-get install python3-tk python3-dev -y
 pip3 install selenium screeninfo pyautogui
+# 验证安装
+echo -e "${GREEN}验证Python依赖安装...${NC}"
+python3 -c "import selenium; print('Selenium版本:', selenium.__version__)"
+python3 -c "import pyautogui; print('PyAutoGUI版本:', pyautogui.__version__)"
 
 # 创建运行脚本
 echo -e "${GREEN}创建运行脚本...${NC}"
