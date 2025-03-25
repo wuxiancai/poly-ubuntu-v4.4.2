@@ -41,7 +41,8 @@ sudo apt-get install -y --fix-missing \
     x11-apps \
     xdpyinfo \
     python3-xlib \
-    scrot
+    scrot \
+    jq
 
 set -e  # 发生错误时退出
 ARCH=$(dpkg --print-architecture)
@@ -65,7 +66,7 @@ elif [[ "$ARCH" == "amd64" ]]; then
     CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json" | jq -r '.versions[] | select(.version | startswith("'$CHROME_VERSION'")) | .version' | head -n 1)
     
     # 下载对应版本的ChromeDriver
-    wget "https://storage.googleapis.com/chrome-for-testing-public/${CHROMEDRIVER_VERSION}/chromedriver-linux64.zip"
+    wget "https://storage.googleapis.com/chrome-for-testing-public/{CHROMEDRIVER_VERSION}/linux64/chromedriver-linux64.zip"
     unzip -q chromedriver_linux64.zip -d /tmp/
     sudo mv /tmp/chromedriver /usr/local/bin/
     sudo chmod +x /usr/local/bin/chromedriver
