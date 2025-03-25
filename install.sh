@@ -39,6 +39,7 @@ sudo apt-get install -y --fix-missing \
     wget \
     xauth \
     x11-apps \
+    x11-utils \
     python3-xlib \
     scrot \
     jq
@@ -92,8 +93,13 @@ fi
 
 # 创建 Python 虚拟环境
 echo -e "${GREEN}创建 Python 虚拟环境...${NC}"
-python_version = python3 --version
-sudo apt install python3.10-venv -y
+# 判断 python3 版本,根据版本安装 PYTON3.*-venv
+python_version=$(python3 --version)
+if [[ "$python_version" == "Python 3.10"* ]]; then
+    sudo apt install python3.10-venv -y
+else
+    sudo apt install python3.12-venv -y
+fi
 sudo rm -rf .venv
 python3 -m venv .venv
 
@@ -103,7 +109,9 @@ source .venv/bin/activate
 echo -e "${GREEN}安装 Python 依赖...${NC}"
 sudo apt update && sudo apt upgrade -y
 sudo apt-get install python3-tk python3-dev -y
-pip3 install selenium screeninfo pyautogui
+pip3 install selenium --break-system-packages
+pip3 install screeninfo --break-system-packages
+pip3 install pyautogui --break-system-packages
 # 验证安装
 echo -e "${GREEN}验证Python依赖安装...${NC}"
 python3 -c "import selenium; print('Selenium版本:', selenium.__version__)"
@@ -116,7 +124,27 @@ cat > run_trade.sh << 'EOL'
 # 激活虚拟环境
 source .venv/bin/activate
 python3 crypto_trader.py
+EOL
 
+# 检查是否有实际显示器
+if xdpyinfo >/dev/null 2>&1; then
+  echo "检测到实际显示器，使用实际显示"
+  # 使用实际显示器
+  python3 crypto_trader.py
+else
+  echo "未检测到实际显示器，使用虚拟显示"
+  # 设置虚拟显示
+  export DISPLAY=:99
+  Xvfb :99 -screen 0 1280x1024x24 &
+  XVFB_PID=$!
+  sleep 2  # 等待Xvfb启动
+  
+  # 运行交易程序
+  python3 crypto_trader.py
+  
+  # 清理
+  kill $XVFB_PID
+fi
 EOL
 
 # 创建日志目录
