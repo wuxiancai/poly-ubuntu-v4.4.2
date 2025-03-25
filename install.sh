@@ -39,7 +39,6 @@ sudo apt-get install -y --fix-missing \
     wget \
     xauth \
     x11-apps \
-    xdpyinfo \
     python3-xlib \
     scrot \
     jq
@@ -55,7 +54,7 @@ elif [[ "$ARCH" == "amd64" ]]; then
     echo "✅ 检测到 AMD64 架构，开始安装 Google Chrome 和 ChromeDriver..."
     
     # 下载 Google Chrome
-    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    wget "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
     sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
 
     # 获取Chrome版本并提取主版本号
@@ -70,7 +69,7 @@ elif [[ "$ARCH" == "amd64" ]]; then
     echo "找到 ChromeDriver 版本: $CHROMEDRIVER_VERSION"
     # 下载 ChromeDriver
     wget "$CHROMEDRIVER_VERSION"
-    echo "✅ 下载完成！
+    echo "✅ 下载完成！"
     # 解压并安装
     unzip chromedriver-linux64.zip
     sudo mv chromedriver-linux*/chromedriver /usr/local/bin/
