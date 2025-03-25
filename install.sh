@@ -69,7 +69,8 @@ elif [[ "$ARCH" == "amd64" ]]; then
     fi
     echo "找到 ChromeDriver 版本: $CHROMEDRIVER_VERSION"
     # 下载 ChromeDriver
-    wget "https://storage.googleapis.com/chrome-for-testing-public/${CHROMEDRIVER_VERSION}/chromedriver-linux64.zip"
+    wget "$CHROMEDRIVER_VERSION"
+    echo "✅ 下载完成！
     # 解压并安装
     unzip chromedriver-linux64.zip
     sudo mv chromedriver-linux*/chromedriver /usr/local/bin/
