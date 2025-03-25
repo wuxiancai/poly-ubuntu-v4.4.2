@@ -61,9 +61,10 @@ elif [[ "$ARCH" == "amd64" ]]; then
     CHROME_VERSION=$(google-chrome --version | grep -oP '[0-9]+(\.[0-9]+)*')
     CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
     wget "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
-    unzip chromedriver_linux64.zip
-    sudo mv chromedriver /usr/local/bin/
+    unzip -q chromedriver_linux64.zip -d /tmp/
+    sudo mv /tmp/chromedriver /usr/local/bin/
     sudo chmod +x /usr/local/bin/chromedriver
+    rm -f chromedriver_linux64.zip
 else
     echo "❌ 不支持的架构: $ARCH"
     exit 1
