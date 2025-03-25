@@ -81,8 +81,6 @@ class CryptoTrader:
         super().__init__()
         self.logger = Logger('poly')
         # 添加Linux专用配置
-        self.chrome_binary_path = "/snap/bin/chromium"
-        self.chromedriver_path = "/usr/bin/chromedriver"
         
         self.driver = None
         self.running = False
@@ -828,7 +826,21 @@ class CryptoTrader:
         """在新线程中执行浏览器操作"""
         try:
             self.update_status(f"正在尝试访问: {new_url}")
-            
+            self.system_os = platform.system()
+            self.arch = platform.machine()  # 获取 CPU 架构
+            # 根据架构适配 Chrome 和 ChromeDriver
+            if self.system_os == "Linux":
+                if self.arch == "aarch64":  # ARM64 架构
+                    self.chrome_binary_path = "/snapp/bin/chromium"
+                    self.chromedriver_path = "/usr/bin/chromedriver"
+                elif self.arch == "x86_64":  # AMD64 架构
+                    self.chrome_binary_path = "/usr/bin/google-chrome"
+                    self.chromedriver_path = "/usr/local/bin/chromedriver"
+                else:
+                    raise ValueError(f"❌ 不支持的架构: {self.arch}")
+            else:
+                raise ValueError(f"❌ 仅支持 Linux (当前系统: {self.system_os})")
+
             if not self.driver:
                 chrome_options = Options()
                 # Linux专用配置
