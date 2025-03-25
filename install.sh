@@ -57,10 +57,15 @@ elif [[ "$ARCH" == "amd64" ]]; then
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
     sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
 
-    # 安装 ChromeDriver
-    CHROME_VERSION=$(google-chrome --version | grep -oP '[0-9]+(\.[0-9]+)*')
-    CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-    wget "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+    # 获取Chrome版本并提取主版本号
+    CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
+    echo "检测到Chrome主版本号: $CHROME_VERSION"
+    
+    # 直接使用主版本号获取对应的ChromeDriver
+    CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json" | jq -r '.versions[] | select(.version | startswith("'$CHROME_VERSION'")) | .version' | head -n 1)
+    
+    # 下载对应版本的ChromeDriver
+    wget "https://storage.googleapis.com/chrome-for-testing-public/${CHROMEDRIVER_VERSION}/chromedriver-linux64.zip"
     unzip -q chromedriver_linux64.zip -d /tmp/
     sudo mv /tmp/chromedriver /usr/local/bin/
     sudo chmod +x /usr/local/bin/chromedriver
