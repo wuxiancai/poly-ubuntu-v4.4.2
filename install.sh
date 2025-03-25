@@ -62,8 +62,9 @@ elif [[ "$ARCH" == "amd64" ]]; then
     CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1)
     echo "检测到Chrome主版本号: $CHROME_VERSION"
     
-    # 直接使用主版本号获取对应的ChromeDriver
     CHROMEDRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json" | jq -r '.versions[] | select(.version | startswith("'$CHROME_VERSION'")) | .version' | head -n 1)
+    echo "Chrome 主版本号: $CHROME_VERSION"
+    echo "匹配的 ChromeDriver 版本: $CHROMEDRIVER_VERSION"
     
     # 下载对应版本的ChromeDriver
     wget "https://storage.googleapis.com/chrome-for-testing-public/{CHROMEDRIVER_VERSION}/linux64/chromedriver-linux64.zip"
