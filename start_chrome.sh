@@ -15,7 +15,7 @@ fi
 # 版本检查函数
 check_drivers() {
     # 获取Chromium完整版本号（示例输出：Chromium 123.0.6312.45）
-    CHROME_FULL_VERSION=$(chromium-browser --version | awk '{print $2}')
+    CHROME_FULL_VERSION=$(chromium --version | awk '{print $2}')
     CHROME_MAJOR_VERSION=$(echo "$CHROME_FULL_VERSION" | cut -d'.' -f1)
     echo -e "${YELLOW}检测到Chromium版本: ${CHROME_FULL_VERSION}${NC}"
 

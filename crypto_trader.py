@@ -81,8 +81,8 @@ class CryptoTrader:
         super().__init__()
         self.logger = Logger('poly')
         # 添加Linux专用配置
-        self.chrome_binary_path = "./chrome/opt/google/chrome/chrome"
-        self.chromedriver_path = "./chrome/chromedriver"
+        self.chrome_binary_path = "/snap/bin/chromium"
+        self.chromedriver_path = "/usr/bin/chromedriver"
         
         self.driver = None
         self.running = False
